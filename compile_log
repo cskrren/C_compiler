@@ -1,0 +1,15 @@
+ERROR: grammar文件丢失
+ERROR: 产生式右侧为空
+ERROR: 生成ACTION/GOTO表时遇到问题
+ERROR: 生成ACTION/GOTO表时遇到问题
+ERROR: 生成ACTION/GOTO表时遇到问题
+ERROR: 生成ACTION/GOTO表时遇到问题
+ERROR: 生成ACTION/GOTO表时遇到问题
+ERROR: 生成ACTION/GOTO表时遇到问题
+ERROR: 动态申请空间失败
+ERROR: 动态申请空间失败
+ERROR: 数组索引不完整
+ERROR: 数组索引不完整
+ERROR: 数组索引不完整
+ERROR: 数组索引不完整
+ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 语义分析器错误:找不到产生式 <ACTUALPARAM>::='epsilon' 的语义分析子程序
