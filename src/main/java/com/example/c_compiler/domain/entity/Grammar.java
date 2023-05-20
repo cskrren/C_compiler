@@ -135,41 +135,13 @@ public class Grammar {
             globalUtils.removeDuplicates(VT);
             VT.add("#");
             if (VN.size() != P.size()) {
-                String err = "grammar产生式与非终结符数目不对应";
+                String err = "ERROR: grammar产生式与非终结符数目不对应";
                 globalUtils.errorLog(err);
             }
         } catch (IOException e) {
             String err = "ERROR: grammar文件丢失\n";
             globalUtils.errorLog(err);
         }
-    }
-
-    public void showGrammar() {
-        System.out.println("**************** Grammar ****************");
-        System.out.println("**************** VN ****************");
-        for (int i = 0; i < VN.size(); i++)
-            System.out.print("(" + (i + 1) + ") " + VN.get(i) + " ");
-        System.out.println("\n**************** VT ****************");
-        for (int i = 0; i < VT.size(); i++)
-            System.out.print("(" + (i + 1) + ") " + VT.get(i) + " ");
-        System.out.println("\n**************** S ****************");
-        System.out.println(S);
-        System.out.println("**************** P ****************");
-        int cnt = 1;
-        for (Map.Entry<String, List<List<String>>> entry : P.entrySet()) {
-            String key = entry.getKey();
-            List<List<String>> value = entry.getValue();
-            System.out.print("(" + cnt + ") " + key + "->");
-            for (List<String> v : value) {
-                for (String s : v) {
-                    System.out.print(s + " ");
-                }
-                System.out.print("|");
-            }
-            System.out.println();
-            cnt++;
-        }
-        System.out.println("**************** End ****************");
     }
 
     public void genFIRST() {
@@ -200,18 +172,6 @@ public class Grammar {
                 }
             }
         }
-    }
-
-    public void showFIRST() {
-        System.out.println("**************** FIRST ****************");
-        for (String i : FIRST.keySet()) {
-            System.out.print("FIRST[" + i + "]={");
-            for (String j : FIRST.get(i)) {
-                System.out.print(j + ",");
-            }
-            System.out.println("}");
-        }
-        System.out.println("**************** End ****************");
     }
 
     public void genCLOSURE(Closure c) {
@@ -253,31 +213,6 @@ public class Grammar {
         }
     }
 
-    public void showCLOSURE(Closure c) {
-        System.out.println("**************** CLOSURE_SET ****************");
-        for (int i = 0; i < c.set.size(); i++) {
-            System.out.print(c.set.get(i).p.getKey() + "->");
-            for (int j = 0; j < c.set.get(i).p.getValue().size(); j++) {
-                if (j == c.set.get(i).dot)
-                    System.out.print("·");
-                System.out.print(c.set.get(i).p.getValue().get(j) + " ");
-            }
-            if (c.set.get(i).dot == c.set.get(i).p.getValue().size())
-                System.out.print("·");
-            System.out.print(" --- ");
-            for (int j = 0; j < c.set.get(i).expect.size(); j++)
-                System.out.print(c.set.get(i).expect.get(j) + " ");
-            System.out.println();
-        }
-        System.out.println("**************** CLOSURE_NEXT ****************");
-        Iterator<Map.Entry<String, Integer>> it = c.next.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, Integer> entry = it.next();
-            System.out.println(entry.getKey() + "->" + entry.getValue());
-        }
-        System.out.println("**************** End ****************");
-    }
-
     public void analysisLR1() {
         int count = 0;
         Stack<Integer> wait = new Stack<>();
@@ -315,17 +250,6 @@ public class Grammar {
             }
         }
     }
-
-
-    public void showLR1() {
-        for (Map.Entry<Integer, Closure> entry : collection.entrySet()) {
-            System.out.println("**********************************************");
-            System.out.println("No:" + entry.getKey());
-            showCLOSURE(entry.getValue());
-            System.out.println("**********************************************");
-        }
-    }
-
 
     public void genLR1Table() {
         for (Map.Entry<Integer, Closure> entry : collection.entrySet()) {
@@ -368,47 +292,6 @@ public class Grammar {
             }
             ACTION.put(p, newaction);
             GOTO.put(p, newgoto);
-        }
-    }
-
-    public void showTable() {
-        if (ACTION.size() != GOTO.size()) {
-            String err = "ERROR: ACTION表和GOTO表长度不同\n";
-            globalUtils.errorLog(err);
-        }
-        for (Map.Entry<Integer, List<ActionItem>> entry : ACTION.entrySet()) {
-            int state = entry.getKey();
-            List<ActionItem> actionList = entry.getValue();
-            System.out.print(state + "\t");
-            for (int i = 0; i < actionList.size(); i++) {
-                ActionItem item = actionList.get(i);
-                switch (item.status) {
-                    case ACTION_ACC:
-                        System.out.print("ACC\t");
-                        break;
-                    case ACTION_STATE:
-                        System.out.print("s" + item.nextState + "\t");
-                        break;
-                    case ACTION_REDUCTION:
-                        System.out.print("r:" + item.p.getKey() + "->");
-                        for (int j = 0; j < item.p.getValue().size(); j++) {
-                            System.out.print(item.p.getValue().get(j) + " ");
-                        }
-                        break;
-                    case ACTION_ERROR:
-                        System.out.print("\t");
-                        break;
-                    default:
-                        break;
-                }
-                System.out.print("\t");
-            }
-            System.out.print("\t");
-            List<Integer> gotoList = GOTO.get(state);
-            for (int i = 0; i < gotoList.size(); i++) {
-                System.out.print(gotoList.get(i) + " ");
-            }
-            System.out.println();
         }
     }
 }

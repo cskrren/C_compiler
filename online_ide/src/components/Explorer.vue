@@ -9,13 +9,14 @@
       @node-contextmenu="showMenuByNode"
       @node-click="nodeClick"
       :data="treeItemsProp">
-      <template v-slot:default="{node, data}">
+      <template v-slot:default="{data}">
         <span>
             <span v-if="isDirectory(data)" style="color: #5EA294" class="el-icon-folder-opened"></span>
             <span v-else class="el-icon-document" style="color: rgb(65, 184, 131)"></span>
           <span 
             v-show="!(treeNodesMap[data.id].isShowCreateFileInput||treeNodesMap[data.id].isShowRenameInput)"
-            style="font-size: 14px">
+            style="font-size: 14px"
+            >
             {{data.label}}
           </span>
           <input
@@ -51,6 +52,9 @@
 import { Tree, Card } from "element-ui";
 import explorerMenuComponent from "./ExplorerMenu.vue";
 import uuidV1 from 'uuid/v1'
+import Menu from './Menu.vue';
+import {EventBus} from '../event/EventBus'
+const fetch = require('node-fetch');
 export default {
   data: function() {
     return {
@@ -60,11 +64,23 @@ export default {
         positionY: "0px"
       },
       nodeToBeProcessed: null,
-      treeNodesMap: this.generateTreeNodeMap(this.treeItemsProp, {}),
+      newSystemNode: {},
+      maxFileNum: 1000,
+      treeNodesMap: Object.fromEntries(
+        Array.from({ length: 1000 }, (_, i) => [
+          i + 1,
+          {
+            isShowCreateFileInput: false,
+            isShowRenameInput: false,
+          },
+        ])
+      ),
+      treeNodeNum: 0,
       isAddNode: false,
       newNode: null,
       node_vm: null,
-      defaultExpandKeys: new Array()
+      defaultExpandKeys: new Array(),
+      fileContent: ''
     };
   },
   props: {
@@ -74,6 +90,24 @@ export default {
       }
     }
   },
+  mounted() {
+    EventBus.$on('new', (data) => {
+    // 调用兄弟组件的函数
+      this.createFileClickListener(data);
+    });
+    EventBus.$on('upload', (file) => {
+      this.add(file)
+    });
+    EventBus.$on('download', () => {
+      this.download()
+    });
+    EventBus.$on('save_result', (data) => {
+      this.saveResult(data)
+    });
+  },
+  created() {
+    this.getNodeNum() 
+  },
   methods: {
     isDirectory: function(node) {
       if(node.type === 'directory') {
@@ -81,17 +115,112 @@ export default {
       }
       return false
     },
-    generateTreeNodeMap: function(treeNodes, treeNodesMap) {
-      treeNodes.forEach(node => {
-        treeNodesMap[node.id] = {
-          isShowCreateFileInput: false,
-          isShowRenameInput: false
-        }
-        if(node.children) {
-          this.generateTreeNodeMap(node.children, treeNodesMap)
-        }
+    keyDownNode(data){
+      this.nodeToBeProcessed = data
+    },
+    saveResult(data){
+      this.treeNodeNum++
+      this.newNode = {
+        id: this.treeNodeNum,
+        label: data['fileName'],
+        fileId : data['fileId'],
+        type: 'file',
+        fileContent: data['code']
+      }
+      fetch('http://localhost:8081/saveresult', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.newNode)
+      })
+      .then(res => res.json())
+    },
+    download(){
+      if (this.nodeToBeProcessed && this.isDirectory(this.nodeToBeProcessed)) {
+        return
+      }
+      console.log(this.nodeToBeProcessed)
+      const fileName = this.nodeToBeProcessed.label; // 文件名称
+      const fileContent = this.nodeToBeProcessed.fileContent; // 文件内容
+
+      // 创建Blob对象
+      const blob = new Blob([fileContent], { type: 'text/plain' });
+
+      // 生成文件的URL
+      const fileUrl = URL.createObjectURL(blob);
+
+      // 创建一个隐藏的<a>标签
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = fileName;
+
+      // 模拟点击下载
+      link.click();
+
+      // 释放URL资源
+      URL.revokeObjectURL(fileUrl);
+    },
+    getNodeNum(){
+      fetch('http://localhost:8081/system/nodecount')
+      .then(res => res.json())
+      .then(json => {
+        this.treeNodeNum = json['data']
+      })
+    },
+    readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+        const contents = event.target.result;
+        resolve(contents);
+        };
+
+        reader.onerror = (event) => {
+        reject(event.target.error);
+        };
+
+        reader.readAsText(file);
       });
-      return treeNodesMap
+    },
+    async add(file){
+      if (this.nodeToBeProcessed && !this.isDirectory(this.nodeToBeProcessed)) {
+        return
+      }
+      this.fileContent = await this.readFile(file);
+      console.log(this.fileContent)
+      this.treeNodeNum++
+      this.newNode = {
+        id: this.treeNodeNum,
+        label: file.name,
+        type: 'file',
+        children: null,
+        fileContent: this.fileContent
+      }
+      this.$set(
+        this.treeNodesMap,
+        this.newNode.id,
+        {isShowCreateFileInput: false, isShowRenameInput: false}
+      )
+      this.$refs.treeVm.append(this.newNode, this.nodeToBeProcessed)
+      this.newSystemNode = {
+        id: this.newNode.id,
+        label: this.newNode.label,
+        fatherId: this.nodeToBeProcessed ? this.nodeToBeProcessed.id : 0,
+        type: this.newNode.type,
+        fileContent: this.newNode.fileContent
+      }
+      console.log(this.newSystemNode)
+      fetch('http://localhost:8081/system/nodeinsert', {
+        method: 'POST',
+        body: JSON.stringify(this.newSystemNode),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
+      this.hideMenu()
+      this.defaultExpandKeys.push(this.newNode.id)
     },
     // 显示菜单
     showMenu: function(eve) {
@@ -126,6 +255,7 @@ export default {
       this.hideMenu();
     },
     nodeClick: function(node) {
+      this.nodeToBeProcessed = node
       this.$emit('node-click', node)
     },
     // 点击创建节点
@@ -133,11 +263,13 @@ export default {
       if(this.nodeToBeProcessed && !this.isDirectory(this.nodeToBeProcessed)) {
         return
       }
+      this.treeNodeNum++
       this.newNode = {
-        id: uuidV1(),
+        id: this.treeNodeNum,
         label: '',
         type: fileType,
-        children: null
+        children: null,
+        fileContent: ''
       }
       this.addNode(this.newNode, this.nodeToBeProcessed)
       this.hideMenu()
@@ -158,6 +290,13 @@ export default {
       })
       this.hideMenu()
     },
+    downloadClickListener: function() {
+      if(!this.nodeToBeProcessed) {
+        return
+      }
+      this.nodeToBeProcessed.download()
+      this.hideMenu()
+    },
     // 新增节点
     addNode: function(newNode, parentNode) {
       if(!newNode) {
@@ -169,6 +308,21 @@ export default {
         {isShowCreateFileInput: true, isShowRenameInput: false}
       )
       this.$refs.treeVm.append(newNode, parentNode)
+      this.newSystemNode = {
+        id: newNode.id,
+        label: "default",
+        fatherId: parentNode ? parentNode.id : 0,
+        type: newNode.type,
+        fileContent: ""
+      }
+      console.log(this.newSystemNode)
+      fetch('http://localhost:8081/system/nodeinsert', {
+        method: 'POST',
+        body: JSON.stringify(this.newSystemNode),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
     },
     // 移除节点
     removeNode: function(treeItem) {
@@ -177,6 +331,13 @@ export default {
       }
       this.treeNodesMap[treeItem.id] = undefined
       this.$refs.treeVm.remove(treeItem);
+      fetch('http://localhost:8081/system/nodedelete', {
+        method: 'POST',
+        body: JSON.stringify(treeItem),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
     },
     // 创建节点输入框失去焦点
     createFileInputBlur: function() {
@@ -184,12 +345,14 @@ export default {
         return
       }
       this.treeNodesMap[this.newNode.id].isShowCreateFileInput = false
-      if(this.isAddNode) {
-        this.isAddNode = false
-        this.newNode = null
-        return
-      }
-      this.removeNode(this.newNode)
+      console.log(this.newNode)
+      fetch('http://localhost:8081/system/noderename', {
+        method: 'POST',
+        body: JSON.stringify(this.newNode),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
       this.newNode = null
     },
     keyDownEnterRenameInput: function(node) {
@@ -197,6 +360,19 @@ export default {
         return
       }
       this.treeNodesMap[node.id].isShowRenameInput = false
+      
+      fetch('http://localhost:8081/system/noderename', {
+        method: 'POST',
+        body: JSON.stringify(node),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }).then(res => res.json())
+      if(this.isAddNode) {
+        this.isAddNode = false
+        this.newNode = null
+        return
+      }
       this.$emit('rename-enter', node)
     },
     keyDownEnterCreateFileInput: function() {
@@ -218,7 +394,8 @@ export default {
   components: {
     elTree: Tree,
     elCard: Card,
-    explorerMenuComponent
+    explorerMenuComponent,
+    Menu
   }
 };
 </script>

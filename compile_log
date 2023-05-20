@@ -12,4 +12,8 @@ ERROR: 数组索引不完整
 ERROR: 数组索引不完整
 ERROR: 数组索引不完整
 ERROR: 数组索引不完整
-ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 语义分析器错误:找不到产生式 <ACTUALPARAM>::='epsilon' 的语义分析子程序
+ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 数组下标错误ERROR: 语义分析器错误:找不到产生式 <ACTUALPARAM>::='epsilon' 的语义分析子程序ERROR: Syntax error on line 1
+ERROR: Syntax error on line 1
+ERROR: Syntax error on line 1
+globalUtils.state.ERROR: 出错位置在第1行ERROR: Syntax error on line 1
+ERROR: Syntax error on line 1

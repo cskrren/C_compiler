@@ -18,6 +18,7 @@ public class OptimizerAnalysis {
     private List<TASitem> unoptimized_code;
     private List<BlockItem> unoptimized_block;
     public List<TASitem> intermediate_code;
+    public List<TASitem> original_code;
     public List<BlockItem> block_group;
 
     public OptimizerAnalysis() {
@@ -51,12 +52,12 @@ public class OptimizerAnalysis {
             if (entry.getValue().equals("main") && main_id == -1) {
                 main_id = entry.getKey();
             } else if (entry.getValue().equals("main") && main_id != -1) {
-                String err = "";
+                String err = "ERROR: 中间代码分块出错";
                 globalUtils.errorLog(err);
             }
         }
         if (main_id == -1) {
-            String err = "";
+            String err = "ERROR: 优化出错";
             globalUtils.errorLog(err);
         }
         for (int i = 0; i < global_table.table.size(); i++) {
@@ -644,58 +645,20 @@ public class OptimizerAnalysis {
         System.out.println("*********************************");
     }
 
-    public void showBlockGroup() {
-        for (int i = 0; i < block_group.size(); i++) {
-            System.out.println(block_group.get(i).begin + "\t-\t" + block_group.get(i).end);
-            System.out.print("wait_variable:\t\t");
-            for (int j = 0; j < block_group.get(i).wait_variable.size(); j++) {
-                System.out.print(block_group.get(i).wait_variable.get(j) + " ");
-            }
-            System.out.println();
-            System.out.print("useless_variable:\t");
-            for (int j = 0; j < block_group.get(i).useless_variable.size(); j++) {
-                System.out.print(block_group.get(i).useless_variable.get(j) + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    public void showDAG() {
-        for (int no = 0; no < DAG_group.size(); no++) {
-            List<DAGitem> DAG = DAG_group.get(no);
-            System.out.println("******************block:" + no + "****************");
-            for (int i = 0; i < DAG.size(); i++) {
-                System.out.println("***************NO:" + i + "****************");
-                if (DAG.get(i).isremain) {
-                    System.out.println(DAG.get(i).getCode().op + "\t" + DAG.get(i).getCode().arg1 + "\t" + DAG.get(i).getCode().arg2 + "\t" + DAG.get(i).getCode().result);
-                } else {
-                    System.out.println("isleaf:" + DAG.get(i).isleaf + "\top:" + DAG.get(i).getOp() + "\tuseful:" + DAG.get(i).isUseful());
-                    System.out.println("value:" + DAG.get(i).getValue() + "\tleft child:" + DAG.get(i).left_child + "\tright_child:" + DAG.get(i).right_child + "\tparent:" + DAG.get(i).getParent());
-                    System.out.print("label:");
-                    for (int j = 0; j < DAG.get(i).getLabel().size(); j++) {
-                        System.out.print(DAG.get(i).getLabel().get(j) + " ");
-                    }
-                    System.out.println();
-                }
-                System.out.println("*********************************\n");
-            }
-        }
-    }
-
     public double analysis() {
         preOptimize();
-        showIntermediateCode();
+        //showIntermediateCode();
         partition();
-        //showBlockGroup();
         int route = 0;
         int original_size = intermediate_code.size();
+        original_code = new ArrayList<>(intermediate_code);
         int optimize_size = 0;
         do {
             optimize();
             route++;
         } while (unoptimized_code.size() != intermediate_code.size());
         optimize_size = intermediate_code.size();
-        showIntermediateCode();
+        //showIntermediateCode();
         return 100.0 * (double) optimize_size / (double) original_size;
     }
 }

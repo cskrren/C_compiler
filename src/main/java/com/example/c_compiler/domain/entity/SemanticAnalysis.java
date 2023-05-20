@@ -15,7 +15,6 @@ public class SemanticAnalysis {
     private List<SymbolTable> table_stack;
     private List<Integer> offset_stack;
     private int temp_counter;
-
     public SymbolTable last_table;
     public SymbolTable global_table;
     public List<TASitem> intermediate_code;
@@ -589,42 +588,6 @@ public class SemanticAnalysis {
         } else {
             String err = "ERROR: 语义分析器错误:找不到产生式 " + token + " 的语义分析子程序";
             globalUtils.errorLog(err);
-        }
-    }
-
-    public void showTables(LinkedHashMap<Integer, String> name_table) {
-        SymbolTable tp = last_table;
-        while (tp != null) {
-            System.out.println("******** TABLE ");
-            System.out.println("width:" + tp.width);
-            for (int i = 0; i < tp.table.size(); i++) {
-                if (tp.table.get(i).k == globalUtils.kind.VAR) {
-                    System.out.print("VAR\t");
-                } else if (tp.table.get(i).k == globalUtils.kind.ARRAY) {
-                    System.out.print("ARRAY\t");
-                } else if (tp.table.get(i).k == globalUtils.kind.FUNC) {
-                    System.out.print("FUNC\t");
-                }
-                if (tp.table.get(i).t == globalUtils.type.INT) {
-                    System.out.print("INT\t");
-                } else if (tp.table.get(i).t == globalUtils.type.VOID) {
-                    System.out.print("VOID\t");
-                }
-                System.out.print(name_table.get(tp.table.get(i).id) + "\t" + tp.table.get(i).offset + "\t");
-                for (int j = 0; j < tp.table.get(i).dimension.size(); j++) {
-                    System.out.print(tp.table.get(i).dimension.get(j) + ' ');
-                }
-                System.out.println();
-            }
-            System.out.println(" TABLE ********");
-            tp = tp.previous;
-        }
-    }
-
-    public void showIntermediateCode() {
-        System.out.println("********Intermediate Code********");
-        for (int i = 0; i < intermediate_code.size(); i++) {
-            System.out.println("(" + (i + 1) + ")\t" + intermediate_code.get(i).op + '\t' + intermediate_code.get(i).arg1 + '\t' + intermediate_code.get(i).arg2 + '\t' + intermediate_code.get(i).result);
         }
     }
 }

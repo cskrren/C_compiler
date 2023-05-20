@@ -107,6 +107,7 @@ public class LexicalAnalysis {
         this.nameTable = new LinkedHashMap<Integer, String>();
         this.history = new ArrayList<Pair<String, Integer>>();
     }
+
     private boolean is_skip(String str) {
         for (String i : skip) {
             if (i.equals(str)) {
@@ -144,7 +145,7 @@ public class LexicalAnalysis {
     }
 
     private boolean is_number(String str) {
-        if (globalUtils.getChar(str,0)  >= '0' && globalUtils.getChar(str, 0) <= '9') {
+        if (globalUtils.getChar(str, 0) >= '0' && globalUtils.getChar(str, 0) <= '9') {
             return true;
         } else {
             return false;
@@ -162,13 +163,12 @@ public class LexicalAnalysis {
     public void setFileString(String fstring) {
         sourceFile = fstring;
     }
-    
-    public Pair<String, Integer> getLexic()
-    {
+
+    public Pair<String, Integer> getLexic() {
         String buf = "";
         while (pos < sourceFile.length()) {
             String first_sym = Character.toString(globalUtils.getChar(sourceFile, pos));
-            String second_sym = Character.toString(globalUtils.getChar(sourceFile, pos+1));
+            String second_sym = Character.toString(globalUtils.getChar(sourceFile, pos + 1));
             String double_sym = first_sym + second_sym;
             switch (S) {
                 case INIT:
@@ -288,7 +288,7 @@ public class LexicalAnalysis {
                     }
                     break;
                 case ERROR:
-                    String err = "globalUtils.state.ERROR: 出错位置在第" + retCode + "行";
+                    String err = "ERROR: 出错位置在第" + retCode + "行";
                     globalUtils.errorLog(err);
                     history.add(new Pair<>("globalUtils.state.ERROR", -1));
                     return new Pair<>("globalUtils.state.ERROR", -1);
@@ -297,11 +297,4 @@ public class LexicalAnalysis {
         history.add(new Pair<>("#", -1));
         return new Pair<>("#", -1);
     }
-
-//    public void showSymbolTable() {
-//        System.out.println("符号表：");
-//        for (Map.Entry<Integer, String> entry : nameTable.entrySet()) {
-//            System.out.println(entry.getKey() + " " + entry.getValue());
-//        }
-//    }
 }

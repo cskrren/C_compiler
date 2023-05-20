@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
 public class AnalysisHistoryItem {
     public TASitem TAS;
     public List<String> object_codes;
@@ -23,5 +22,12 @@ public class AnalysisHistoryItem {
         this.object_codes = new ArrayList<>();
         this.RVALUE = new LinkedHashMap<>();
         this.AVALUE = new LinkedHashMap<>();
+    }
+
+    public AnalysisHistoryItem(TASitem tas, List<String> code, Map<String, List<Pair<String, Integer>>> rvalue, Map<String, List<String>> avalue) {
+        this.TAS = new TASitem(tas);
+        this.object_codes = new ArrayList<>(code);
+        this.RVALUE = new LinkedHashMap<>(rvalue);
+        this.AVALUE = new LinkedHashMap<>(avalue);
     }
 }

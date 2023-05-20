@@ -48,30 +48,11 @@ public class SyntaxAnalysis {
         }
     }
 
-    private void _showTree2(TreeNode nownode) {
-        for (int i = 0; i < nownode.level; i++)
-            System.out.print("|--");
-        System.out.print("< " + nownode.content.getKey() + ", ");
-        if (nownode.content.getKey().equals("ID")) {
-            System.out.print(L.nameTable.get(nownode.content.getValue()));
-        } else {
-            System.out.print(nownode.content.getValue());
-        }
-        System.out.println(" >");
-        for (int i = 0; i < nownode.children.size(); i++)
-            _showTree2(nownode.children.get(i));
-    }
-
-    public void initializeLR1()
-    {
+    public void initializeLR1() {
         G.readGrammar();
-        //G.showGrammar();
         G.genFIRST();
-        G.showFIRST();
         G.analysisLR1();
-        //G.showLR1();
         G.genLR1Table();
-        //G.showTable();
     }
 
     public void getInput(String input) {
@@ -80,7 +61,7 @@ public class SyntaxAnalysis {
 
     public void analysis() {
         List<Integer> state = new ArrayList<>();
-        List<Pair<String, Integer>> symbol = new ArrayList<Pair<String,Integer>>();
+        List<Pair<String, Integer>> symbol = new ArrayList<Pair<String, Integer>>();
         state.add(0);
         symbol.add(new Pair<>("#", -1));
         Pair<String, Integer> epsilon_lexis = new Pair<>("epsilon", -1);
@@ -96,7 +77,6 @@ public class SyntaxAnalysis {
             if (lexis.getKey().equals("NL")) {
                 retcode++;
                 lexis = L.getLexic();
-                System.out.println(lexis);
                 continue;
             }
 
@@ -164,7 +144,6 @@ public class SyntaxAnalysis {
                             token += "'" + s + "'";
                     }
                     try {
-                        System.out.println(token);
                         S.analysis(token, tp, L.nameTable);
                     } catch (Exception e) {
                         String err = "ERROR: 在第" + retcode + "行出现语法错误\n";
@@ -191,49 +170,6 @@ public class SyntaxAnalysis {
                     history.add(newList);
             }
         }
-        while (!lexis.getKey().equals("ERROR")) ;
+        while (!lexis.getKey().equals("ERROR"));
     }
-
-    public void showHistory() {
-        System.out.println("**************** History ****************");
-        for (int i = 0; i < history.size(); i++) {
-            System.out.print("---Step:" + i + "---");
-            for (int j = 0; j < history.get(i).size(); j++) {
-                for (int k = 0; k < history.get(i).get(j).size(); k++) {
-                    System.out.print(history.get(i).get(j).get(k) + " ");
-                }
-                System.out.print("\t\t\t");
-            }
-            System.out.println();
-        }
-        System.out.println("**************** End ****************");
-    }
-
-    public void showTree() {
-        System.out.println("**************** ReductionTree ****************");
-        List<TreeNode> idstack = new ArrayList<>();
-        int nowlevel = reductionTreeRoot.getLevel();
-        idstack.add(reductionTreeRoot);
-        while (!idstack.isEmpty()) {
-            TreeNode nownode = idstack.get(0);
-            idstack.remove(0);
-            if (nownode.getLevel() == nowlevel) {
-                System.out.print(nownode.getLevel() + " ");
-            } else {
-                System.out.print("\n" + nownode.getLevel() + " ");
-                nowlevel++;
-            }
-            for (TreeNode child : nownode.getChildren()) {
-                idstack.add(child);
-            }
-        }
-        System.out.println("**************** End ****************");
-    }
-
-    public void showTree2() {
-        System.out.println("**************** ReductionTree2 ****************");
-        _showTree2(reductionTreeRoot);
-        System.out.println("**************** End ****************");
-    }
-
 }

@@ -287,6 +287,8 @@ public class ObjectCodeGenerator {
         emit("addi $fp,$zero,0");
         emit("addi $sp,$zero,4");
         emit("jal Fmain");
+        emit("nop");
+        emit("break");
 
         for (int block_no = 0; block_no < block_group.size(); block_no++)
         {
@@ -863,59 +865,5 @@ public class ObjectCodeGenerator {
             if (!j_end)
                 endBlock();
         }
-//        showAnalysisHistory();
-//        showObjectCode();
     }
-
-    public void showMessageTableHistory() {
-        for (int tno = 0; tno < messageTableHistory.size(); tno++) {
-            MessageTableItem message_table = messageTableHistory.get(tno);
-            System.out.print("(" + message_table.no + ")\t" + message_table.TAS.op + ' ' + message_table.TAS.arg1 + ' ' + message_table.TAS.arg2 + ' ' + message_table.TAS.result);
-            System.out.print("\t(" + message_table.arg1_tag.getKey() + ',' + message_table.arg1_tag.getValue() + ")");
-            System.out.print("\t(" + message_table.arg2_tag.getKey() + ',' + message_table.arg2_tag.getValue() + ")");
-            System.out.println("\t(" + message_table.result_tag.getKey() + ',' + message_table.result_tag.getValue() + ")");
-        }
-    }
-
-    public void showAnalysisHistory() {
-        for (int ino = 0; ino < analysisHistory.size(); ino++) {
-            AnalysisHistoryItem e = analysisHistory.get(ino);
-
-            System.out.println("\n****************(" + e.TAS.op + "," + e.TAS.arg1 + "," + e.TAS.arg2 + "," + e.TAS.result + ")****************");
-            for (int i = 0; i < e.object_codes.size(); i++) {
-                System.out.print(e.object_codes.get(i) + '\t');
-            }
-            System.out.println("\n********RVALUE********");
-            for (Map.Entry<String, List<Pair<String, Integer>>> entry : e.RVALUE.entrySet()) {
-                String key = entry.getKey();
-                List<Pair<String, Integer>> values = entry.getValue();
-                System.out.print(key + "\t");
-                for (int i = 0; i < values.size(); i++) {
-                    Pair<String, Integer> pair = values.get(i);
-                    System.out.print(pair.getKey() + ":" + pair.getValue() + "\t");
-                }
-                System.out.println();
-            }
-            System.out.println("**********************");
-            System.out.println("\n******** AVALUE ********");
-            for (Map.Entry<String, List<String>> entry : e.AVALUE.entrySet()) {
-                String key = entry.getKey();
-                List<String> values = entry.getValue();
-                System.out.print(key + "\t");
-                for (int i = 0; i < values.size(); i++) {
-                    System.out.print(values.get(i) + "\t");
-                }
-                System.out.println();
-            }
-            System.out.println("**********************");
-        }
-    }
-
-    public void showObjectCode() {
-        for (int i = 0; i < object_code.size(); i++) {
-            System.out.println("(" + i + ")\t" + object_code.get(i));
-        }
-    }
-
-
 }

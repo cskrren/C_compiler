@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import {createRouter} from './router/router'
 import App from './App.vue'
-// import ElementUi from 'element-ui'
-// import 'element-ui/lib/theme-chalk/index.css';
+
+import TreeNode from './components/TreeNode.vue'
+Vue.component("tree-node", TreeNode)
 
 // Vue.use(ElementUi)
 export function createApp() {

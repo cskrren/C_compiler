@@ -16,8 +16,8 @@ public class globalUtils {
     public static final String STACK = "stack";
     public static final String DATA = "data";
     public static final String TEMP = "temp";
-
     public static final int stack_size = 128;
+    public static String ErrorMsg = "";
 
     public enum state {
         INIT,
@@ -52,11 +52,10 @@ public class globalUtils {
             BufferedWriter fout = new BufferedWriter(new FileWriter("compile_log", true));
             fout.write(err);
             fout.close();
-            System.out.print(err);
+            throw new CustomException(err);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.exit(-1);
     }
 
     public static void removeDuplicates(List<String> v) {

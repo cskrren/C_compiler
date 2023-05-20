@@ -28,8 +28,6 @@ public class TreeNode {
     int quad;
     int true_list;
     int false_list;
-    int x;
-    int y;
 
     public TreeNode() {
         this.level = -1;
@@ -45,8 +43,6 @@ public class TreeNode {
         this.quad = 0;
         this.true_list = 0;
         this.false_list = 0;
-        this.x = -1;
-        this.y = -1;
         this.parent = null;
     }
 

@@ -17,6 +17,20 @@
       </editor-component>
     </div>
     <footer></footer>
+    <div v-if="showModal" class="modal-container">
+      <div class="modal" :class="{ 'modal-open': showModal }">
+        <p class="prompt">{{ "查找" }}</p>
+        <input type="text" class="input-field" v-model="findValue" />
+        <div v-if="isReplace">
+          <p class="prompt">{{ "替换" }}</p>
+          <input type="text" class="input-field" v-model="replaceValue" />
+        </div>
+        <div class="buttons">
+          <button @click="confirm">确认</button>
+          <button @click="cancel">取消</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -24,27 +38,86 @@
 import menuComponent from "./Menu.vue";
 import explorerComponent from "./Explorer.vue";
 import editorComponent from "./Editor.vue";
-// 测试数据
-var file = {
-  id: 1,
-  fileName: 'UserContriller.java',
-  fileContent: 'hello',
-  type: 'directory'
-}
+import { EventBus } from "../event/EventBus";
+const fetch = require('node-fetch');
 var files = [
-  
 ]
 var nodes = [
-  {id: 1, label: 'node.js', type: 'directory', children: [{id: 2, label: 'vue.js', children: null, type: 'file', fileContent: 'vue.js'}]},
-  {id: 3, label: 'main.js', type: 'directory', children: [{id: 4, label: 'index.html', children: null, type: 'file', fileContent: 'index.html'}]},
-  {id: 5, label: 'User.class', type: 'directory', children: [{id: 6, label: 'vue.js', children: null, type: 'file', fileContent: 'main.js'}]}
 ]
 export default {
   components: { menuComponent, explorerComponent, editorComponent },
   data: function() {
-    return {files, nodes}
+    return {
+      files, 
+      nodes,
+      showModal: false,
+      findValue: '',
+      replaceValue: '',
+      isReplace: false,
+    };
+  },
+  created() {
+    this.getNodelist();
+  },
+  mounted() {
+    EventBus.$on("find", ()=>{
+      this.callfind();
+    });
+    EventBus.$on("replace", ()=>{
+      this.callreplace()
+    });
   },
   methods: {
+    openModal() {
+      this.showModal = true;
+      return new Promise((resolve, reject) => {
+        this.resolveCallback = resolve;
+      });
+    },
+    confirm() {
+      // 调用 resolveCallback，表示确认按钮被按下
+      if (this.resolveCallback) {
+        this.resolveCallback();
+        this.resolveCallback = null; // 重置回调函数
+      }
+      this.closeModal();
+    },
+    cancel() {
+      // 处理取消操作
+      console.log("Canceled");
+      this.closeModal();
+    },
+    closeModal() {
+      this.showModal = false;
+      this.inputValue = ""; // 清空输入框内容
+    },
+    async find() {
+      await this.openModal(); // 等待按钮被按下
+      console.log("Find: " + this.findValue);
+      this.$refs.editor_vm.find(this.findValue);
+    },
+    async replace() {
+      await this.openModal(); // 等待按钮被按下
+      console.log("Find: " + this.findValue);
+      console.log("Replace: " + this.replaceValue);
+      this.$refs.editor_vm.replace(this.findValue, this.replaceValue);
+    },
+    callfind() {
+      this.isReplace = false;
+      this.find();
+    },
+    callreplace() {
+      this.isReplace = true;
+      this.replace();
+    },
+    getNodelist() {
+      fetch('http://localhost:8081/system/nodelist')
+      .then(res => res.json())
+      .then(json => {
+        this.nodes = json['data'];
+        console.log(this.nodes);
+      });
+    },
     openEditor: function(node) {
       if(node.type === 'directory') {
         return
@@ -80,5 +153,47 @@ footer {
   width: 100%;
   background-color: rgb(28, 32, 34);
   border-top: 2px solid rgb(17, 21, 24);
+}
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background-color: #fff;
+  padding: 20px;
+  margin-bottom: 100px;
+  border-radius: 10px;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+}
+
+.modal-open {
+  transform: scale(1);
+}
+.buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.buttons button {
+  margin-right: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buttons button:last-child {
+  margin-right: 0;
 }
 </style>
