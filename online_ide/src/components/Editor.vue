@@ -176,19 +176,25 @@ export default {
     currentFileId: {
       deep: true,
       handler: function(newId, oldId) {
+        var old_content = this.editor_content
         if(newId != undefined && newId != null) {
           var file = this.searchFileById(newId)
           if(file) {
+            console.log(file.isChange)
             this.$set(file, 'isShow', true)
             this.editor_content = file.fileContent
             setTimeout(() => {
               document.getElementById(newId+this.textareaSuffix).focus()
             }, 1)
+            this.$nextTick(() => {
+            })
           }
         }
         if(oldId != undefined && oldId != null) {
           var file = this.searchFileById(oldId)
           if(file) {
+            file.fileContent = old_content
+            EventBus.$emit('changeNode', file.id, file.fileContent)
             this.$set(file, 'isShow', false)
           }
         }
@@ -235,10 +241,45 @@ export default {
     EventBus.$on('documentation', () => {
       this.appendDocument()
     })
+    EventBus.$on('tab', () => {
+      this.appendTab()
+    })
+    EventBus.$on('saveMipsCode', () => {
+      this.saveMipsCode()
+    })
   },
   methods: {
+    saveMipsCode(){
+      if(this.compile_state == true && this.processes[0].content_right != "")
+      {
+        var savename = this.searchFileById(this.currentFileId).fileName.split('.')[0]+'.s';
+        this.compile_node = {
+          code: this.processes[0].content_right,
+          fileId: this.currentFileId,
+          fileName: savename,
+        }
+        EventBus.$emit('save_result', this.compile_node);
+      }
+    },
+    appendTab() {
+      this.$nextTick(() => {
+        for(var i = 0; i < this.files.length; i++) {
+          if(this.files[i].id == this.currentFileId) {
+            var text =  this.$refs.textarea[i];
+            break;
+          }
+        }
+        var start = text.selectionStart;  
+        var end = text.selectionEnd;
+        var tab = "    ";
+        this.editor_content = this.editor_content.substring(0, start) + tab + this.editor_content.substring(end);
+        this.$nextTick(() => {
+          text.selectionStart = start + tab.length;
+          text.selectionEnd = start + tab.length;
+        })
+      })
+    },
     find(value){
-      this.compile_result = ""
       var code = this.editor_content;
       var lines = code.split('\n');
       var lineMap = new Map();
@@ -253,6 +294,7 @@ export default {
       console.log(code.length);
       lineNum = 1;
       var flag = false;
+      this.processes[6].content_left = "Find " + value + " in " + this.searchFileById(this.currentFileId).fileName + ' : \n';
       for(var i = 0; i < code.length; i++){
         if(code[i] == '\n'){
           if (flag == true){
@@ -269,13 +311,12 @@ export default {
           line = line.substring(0, start) + "%" + value + "%" + line.substring(end, line.length);
           lineMap.set(lineNum, {
             content: line,
-            matchnum: end
+            matchnum: end + 1
           });
         }
       }
     },
     replace(findValue, replaceValue){
-      this.compile_result = ""
       var code = this.editor_content;
       var lines = code.split('\n');
       var lineMap = new Map();
@@ -290,6 +331,7 @@ export default {
       console.log(code.length);
       lineNum = 1;
       var flag = false;
+      this.processes[6].content_left = "Replace " + findValue + " with " + replaceValue + " in " + this.searchFileById(this.currentFileId).fileName + ' : \n';
       for(var i = 0; i < code.length; i++){
         if(code[i] == '\n'){
           if (flag == true){
@@ -307,7 +349,7 @@ export default {
           this.editor_content = this.editor_content.substring(0, i) + replaceValue + this.editor_content.substring(i+findValue.length);
           lineMap.set(lineNum, {
             content: line,
-            matchnum: end
+            matchnum: end + 1
           });
         }
       }
@@ -321,9 +363,27 @@ export default {
       }).then(res => res.json())
         .catch(error => console.error('Error:', error))
         .then(response => {
-          this.optimizeRate = response.msg;
+          this.optimizeRate = response.data;
           console.log('Success:', response)
         });
+        var savename = this.searchFileById(this.currentFileId).fileName.split('.')[0]+'.s';
+        var msg =  "编译文件名称为" + this.searchFileById(this.currentFileId).fileName + "\n"
+        msg += "开始编译...\n"
+        msg += "词法分析开始...\n"
+        msg += "词法分析结束\n"
+        msg += "语法分析开始...\n"
+        msg += "语法分析结束\n"
+        msg += "语义分析开始...\n"
+        msg += "语义分析结束\n"
+        msg += "中间代码生成开始...\n"
+        msg += "中间代码生成结束\n"
+        msg += "目标代码生成开始...\n"
+        msg += "目标代码生成结束, 优化率为" + this.optimizeRate.toFixed(2) + "%...\n"
+        msg += "目标代码生成开始...\n"
+        msg += "目标代码生成结束\n"
+        msg += "编译结束\n"
+        msg += "保存文件" + savename + "\n"
+        this.processes[0].content_left = msg;
     },
     async getMipsCode(){
       var content = "";
@@ -335,7 +395,7 @@ export default {
       }).then(res => res.json())
         .catch(error => console.error('Error:', error))
         .then(response => {
-          content = response.msg;
+          content = "MIPS汇编代码如下：\n" + response.msg;
           console.log('Success:', response)
         });
       this.processes[0].content_right = content;
@@ -500,13 +560,6 @@ export default {
           }
         });
       if(this.compile_state){
-        var savename = this.searchFileById(this.currentFileId).fileName.split('.')[0]+'.s';
-        this.compile_node = {
-          code: this.processes[0].content_right,
-          fileId: this.currentFileId,
-          fileName: savename,
-        }
-        EventBus.$emit('save_result', this.compile_node);
         this.getSymbolTable();
         this.getTokenList();
         this.getLR1();
@@ -518,23 +571,6 @@ export default {
         this.getAnalysisHistory();
         this.getMipsCode();
         this.getOptimizeRate();
-        var msg =  "编译文件名称为" + this.searchFileById(this.currentFileId).fileName + "\n"
-        msg += "开始编译...\n"
-        msg += "词法分析开始...\n"
-        msg += "词法分析结束\n"
-        msg += "语法分析开始...\n"
-        msg += "语法分析结束\n"
-        msg += "语义分析开始...\n"
-        msg += "语义分析结束\n"
-        msg += "中间代码生成开始...\n"
-        msg += "中间代码生成结束\n"
-        msg += "目标代码生成开始...\n"
-        msg += "目标代码生成结束, 优化率为" + this.optimize_rate + "\n"
-        msg += "目标代码生成开始...\n"
-        msg += "目标代码生成结束\n"
-        msg += "编译结束\n"
-        msg += "保存文件" + savename + "\n"
-        this.processes[0].content_left = msg;
       } else {
         for (var i = 0; i < this.processes.length; i++){
           this.processes[i].content_left = "";
@@ -581,6 +617,11 @@ export default {
         var first = text.selectionStart
         var last = text.selectionEnd
         this.editor_content = this.editor_content.substring(0, first) + this.clip_board + this.editor_content.substring(last)
+        //指定光标位置
+        this.$nextTick(() => {
+          text.selectionStart = first + this.clip_board.length;
+          text.selectionEnd = first + this.clip_board.length;
+        })
       })
     },
     adjustTextareaHeight() {
@@ -608,9 +649,7 @@ export default {
         }
       } 
     },
-    save(){
-      console.log(this.files)
-      console.log(this.currentFileId)
+    async save(){
       var file = this.searchFileById(this.currentFileId)
       file.fileContent = this.editor_content
       this.curnode={
@@ -620,7 +659,7 @@ export default {
         type: 'file',
         fileContent: file.fileContent,
       }
-      fetch('http://localhost:8081/system/savefile', {
+      await fetch('http://localhost:8081/system/savefile', {
         method: 'POST',
         body: JSON.stringify(this.curnode),
         headers: {
@@ -632,6 +671,7 @@ export default {
         })
         .catch(err => console.log(err))
       this.$set(file, 'isChange', false)
+      EventBus.$emit('changeNode', this.currentFileId, this.editor_content) 
     },
     createLineNumbers: function(text) {
       var lineNumbers = [{id: uuidV1(), number: 1}]

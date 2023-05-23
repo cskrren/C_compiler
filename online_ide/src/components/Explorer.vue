@@ -162,7 +162,7 @@ export default {
       URL.revokeObjectURL(fileUrl);
     },
     getNodeNum(){
-      fetch('http://localhost:8081/system/nodecount')
+      fetch('http://localhost:8081/system/nodemaxid')
       .then(res => res.json())
       .then(json => {
         this.treeNodeNum = json['data']
@@ -247,6 +247,7 @@ export default {
     },
     // 右键移除节点
     deleteClick: function() {
+      console.log(this.nodeToBeProcessed)
       if(!this.nodeToBeProcessed) {
         return
       }
@@ -260,6 +261,7 @@ export default {
     },
     // 点击创建节点
     createFileClickListener: function(fileType) {
+      console.log(this.nodeToBeProcessed)
       if(this.nodeToBeProcessed && !this.isDirectory(this.nodeToBeProcessed)) {
         return
       }

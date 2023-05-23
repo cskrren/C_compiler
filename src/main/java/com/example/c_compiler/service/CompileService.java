@@ -41,7 +41,7 @@ public class CompileService {
     }
 
     public String getTokenList() {
-        String ret = "Token序列：\n";
+        String ret = "词法单元序列：\n";
         ret += "序号" + "\t" + "Token\n";
         for (Pair<String, Integer> item : TokenList) {
             ret += item.getValue() + "\t" + item.getKey() + "\n";
@@ -163,9 +163,7 @@ public class CompileService {
     }
 
     public String getMipsCode() {
-        String ret = "MIPS汇编代码如下：\n";
-        ret += mips_code;
-        return ret;
+        return mips_code;
     }
 
     public double getOptimizeRate() {

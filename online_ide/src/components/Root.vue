@@ -66,8 +66,30 @@ export default {
     EventBus.$on("replace", ()=>{
       this.callreplace()
     });
+    EventBus.$on("changeNode", (id, newcontent)=>{
+      this.change(id, newcontent);
+    });
   },
   methods: {
+    findNodeById(nodes, id) {
+      for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === id) {
+          return nodes[i];
+        }
+        if (nodes[i].children) {
+          var node = this.findNodeById(nodes[i].children, id);
+          if (node) {
+            return node;
+          }
+        }
+      }
+    },
+    change(id, newcontent) {
+      //根据id递归查找所有node, 修改content
+      var node = this.findNodeById(this.nodes, id);
+      console.log(node);
+      node.fileContent = newcontent;
+    },
     openModal() {
       this.showModal = true;
       return new Promise((resolve, reject) => {
@@ -125,7 +147,8 @@ export default {
       this.$refs.editor_vm.appendFile({
         id: node.id,
         fileName: node.label,
-        fileContent: node.fileContent ? node.fileContent : ''
+        fileContent: node.fileContent ? node.fileContent : '',
+        isChange: false
       })
     },
     renameEditorTag: function(node) {

@@ -28,8 +28,9 @@
                 </div>
             </div>
             <div class="menu-item" @click="toggleSubMenu('go')">Run
-                <div class="submenu" v-show="subMenuOpen === 'go'">
+                <div class="submenu" style = "width: 180px;" v-show="subMenuOpen === 'go'">
                     <div class="submenu-item" @click="handlFileCompile()">Compile</div>
+                    <div class="submenu-item" @click="handlFileSaveMipsCode()">Save ObjectCode</div>
                 </div>
             </div>
             <div class="menu-item" @click="toggleSubMenu('help')">Help
@@ -112,6 +113,9 @@ export default {
         handlDocumentation() {
             EventBus.$emit('documentation');
         },
+        handlFileSaveMipsCode() {
+            EventBus.$emit('saveMipsCode');
+        },
         handleMenuAction(action) {
             // 根据传入的操作执行相应的功能
             if (action === 'new file') {
@@ -150,6 +154,9 @@ export default {
             } else if (action === 'documentation') {
                 // 打开文档
                 this.handlDocumentation();
+            } else if (action === 'saveMipsCode') {
+                // 保存MIPS代码
+                this.handlFileSaveMipsCode();
             }
         },
         handleKeyDown(event) {
@@ -190,6 +197,13 @@ export default {
             } else if (event.ctrlKey && event.key === 'h') {
                 event.preventDefault(); // 阻止默认的打开文档操作
                 this.handleMenuAction('documentation'); // 打开文档
+            } else if (event.ctrlKey && event.ShiftKey && event.key === 's') {
+                event.preventDefault(); // 阻止默认的保存MIPS代码操作
+                this.handleMenuAction('saveMipsCode'); // 保存MIPS代码
+            //tab键
+            }  else if (event.key === 'Tab') {
+                event.preventDefault(); // 阻止默认的缩进操作
+                EventBus.$emit('tab'); // 执行缩进操作
             }
         }
     }

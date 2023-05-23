@@ -29,10 +29,10 @@ public class SystemController {
      * 获取表项个数
      * @return AjaxResult
      */
-    @GetMapping("/nodecount")
-    public AjaxResult getNodeCount(){
+    @GetMapping("/nodemaxid")
+    public AjaxResult getNodeMaxId(){
         try {
-            return AjaxResult.success(systemService.count());
+            return AjaxResult.success(systemService.nodemaxid());
         } catch (Exception e) {
             return AjaxResult.error(e.getMessage());
         }

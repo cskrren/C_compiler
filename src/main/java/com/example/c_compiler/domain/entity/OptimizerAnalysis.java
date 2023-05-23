@@ -144,8 +144,11 @@ public class OptimizerAnalysis {
                 e.useless_variable = e.wait_variable;
                 e.wait_variable = new ArrayList<>();
             } else {
+                if (i == block_group.size() - 1) {
+                    String err = "ERROR: no return statement in function " + intermediate_code.get(e.begin).op;
+                    globalUtils.errorLog(err);
+                }
                 List<String> real_wait_variable = new ArrayList<>();
-
                 int pos = block_group.get(i + 1).begin;
                 int prepos = pos - 1;
                 while (prepos < intermediate_code.size()) {

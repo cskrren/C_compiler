@@ -54,9 +54,16 @@ public class SystemService {
         return nodeMap.get(0).getChildren();
     }
 
-    public Integer count() {
+    public Integer nodemaxid() {
         List<SystemTree> nodes= systemTreeMapper.selectList(null);
-        return nodes.size();
+        Integer maxid = 0;
+        for (SystemTree node : nodes) {
+            Integer id = node.getId();
+            if(id > maxid) {
+                maxid = id;
+            }
+        }
+        return maxid;
     }
 
     public void insert(SystemTree newnode) {
