@@ -68,7 +68,7 @@ export default {
       maxFileNum: 1000,
       treeNodesMap: Object.fromEntries(
         Array.from({ length: 1000 }, (_, i) => [
-          i + 1,
+          i,
           {
             isShowCreateFileInput: false,
             isShowRenameInput: false,
