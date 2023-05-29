@@ -16,11 +16,11 @@ This project is a class C compiler implemented in Java. It consists of a Spring 
 
 ## Show
 
-![image-20230529201454182](.\asset\show1.png)
+![image-20230529201454182](./asset/show1.png)
 
-![image-20230529202024178](.\asset\show2.png)
+![image-20230529202024178](./asset/show2.png)
 
-![image-20230529202039245](.\asset\show3.png)
+![image-20230529202039245](./asset/show3.png)
 
 ## Configuration
 
@@ -42,7 +42,7 @@ npm run build
 npm run dev
 ```
 ！！！注意，在npm install或npm run build步骤中报以下错误不会影响最后项目的执行，忽略即可。 
-![image-20230529200759749](.\asset\front-out.png)
+![image-20230529200759749](./asset/front-out.png)
 
 ### 2. 配置数据库
 
@@ -58,19 +58,19 @@ source ./db.sql
 
 (1) 打开IDEA，导入项目，点击MAVEN窗口的Reload All Maven Project。
 
-![image-20230529200147676](.\asset\back-out.png)
+![image-20230529200147676](./asset/back-out.png)
 
 (2) 修改src/main/resources/application.properties文件中数据库设置。
 
-![image-20230529210857684](.\asset\back-out2.png)
+![image-20230529210857684](./asset/back-out2.png)
 
 (3) 找到src/main/java/com/example/c_compiler/CCompilerApplication.java，点击绿色三角执行代码。
 
-![image-20230529200430409](.\asset\back-out3.png)
+![image-20230529200430409](./asset/back-out3.png)
 
 (4) 成功执行后端项目。
 
-![image-20230529200505559](.\asset\back-out4.png)
+![image-20230529200505559](./asset/back-out4.png)
 
 ！！！注意，在配置好后端项目前，不要打开前端端口对应url，会由于后端未执行而中断。
 
@@ -78,7 +78,7 @@ source ./db.sql
 
 ！！！注意，如果遇到如下问题，即文件树显示错误，这是因为数据库传值慢于前端渲染，刷新网页即可。
 
-<img src=".\asset\web.png" alt="image-20230529201231018" style="zoom:67%;" />
+<img src="./asset/web.png" alt="image-20230529201231018" style="zoom:67%;" />
 
 
 
